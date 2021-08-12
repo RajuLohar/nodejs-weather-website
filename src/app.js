@@ -1,10 +1,13 @@
 const path = require("path");
 const express = require("express");
 const hbs = require("hbs");
-const geocode=require('./utils/geocode');
-const forecast=require('./utils/forecast');
+const geocode = require("./utils/geocode");
+const forecast = require("./utils/forecast");
 
 const app = express();
+const port=process.env.PORT || 3000
+
+//Define path for express config
 const publicDirectoryPath = path.join(__dirname, "../public");
 const viewsPath = path.join(__dirname, "../templates/views");
 const partialsPath = path.join(__dirname, "../templates/partials");
@@ -16,7 +19,7 @@ app.use(express.static(publicDirectoryPath));
 
 app.get("", (req, res) => {
   res.render("index", {
-    title: "Index",
+    title: "Weather",
     name: "Raju Lohar",
   });
 });
@@ -36,32 +39,29 @@ app.get("/help", (req, res) => {
 });
 
 app.get("/weather", (req, res) => {
-  if(!req.query.search){
+  if (!req.query.search) {
     return res.send({
-      error:'provide an address'
-    })
+      error: "provide an address",
+    });
   }
 
-  geocode(req.query.search,(error,{latitude,longitude,location}={})=>{
-    if(error){
-      return res.send({error})
+  geocode(req.query.search, (error, { latitude, longitude, location } = {}) => {
+    if (error) {
+      return res.send({ error });
     }
 
-    forecast(latitude,longitude,(error,forecastData)=>{
-      if(error){
-        return res.send({error})
+    forecast(latitude, longitude, (error, forecastData) => {
+      if (error) {
+        return res.send({ error });
       }
 
       res.send({
-        forecast:forecastData,
+        forecast: forecastData,
         location,
-        address:req.query.address
-      })
-
-
-    })
-  })
-
+        address: req.query.address,
+      });
+    });
+  });
 
   // res.send([
   //   {
@@ -70,33 +70,32 @@ app.get("/weather", (req, res) => {
   //     address:req.query.search
   //   },
   // ]);
-
 });
 
 app.get("/products", (req, res) => {
-  if(!req.query.search){
+  if (!req.query.search) {
     return res.send({
-      error:'provide a search'
-    })
+      error: "provide a search",
+    });
   }
-  console.log(req.query.search)
+  console.log(req.query.search);
   res.send({
-    products:[] 
+    products: [],
   });
 });
 
 app.get("/help/*", (req, res) => {
   res.render("404", {
-    errorMessage: "article not found"
+    errorMessage: "article not found",
   });
 });
 
 app.get("*", (req, res) => {
   res.render("404", {
-    errorMessage: "404 not found"
+    errorMessage: "404 not found",
   });
 });
 
-app.listen(3000, () => {
-  console.log("Server is on! 3000");
+app.listen(port, () => {
+  console.log(`Server is on! ${port}`);
 });
